@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean Tendency | Deep Sea Numerology</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@100;300;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon-cyan: #00f2ff;
+  --deep-blue: #000814;
+  --glass-bg: rgba(0, 15, 30, 0.9);
+  --border-cyan: rgba(0, 242, 255, 0.5);
+}
+
+body, html {
+  margin: 0; padding: 0; height: 100%;
+  font-family: 'Noto Sans JP', sans-serif;
+  background-color: var(--deep-blue);
+  color: #e0faff;
+  overflow: hidden;
+}
+
+/* 背景制御 */
+#ocean-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -2;
+  background-color: var(--deep-blue);
+}
+
+/* デフォルトのグリッド背景 */
+#ocean-bg::before {
+  content: ""; position: absolute; inset: 0;
+  background: 
+    linear-gradient(rgba(0, 11, 26, 0.9), rgba(0, 11, 26, 0.9)),
+    repeating-linear-gradient(0deg, transparent 0, rgba(0, 242, 255, 0.03) 1px, transparent 2px),
+    repeating-linear-gradient(90deg, transparent 0, rgba(0, 242, 255, 0.03) 1px, transparent 2px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  transition: opacity 1s ease;
+  z-index: 1;
+}
+
+/* 結果画面用の深海都市背景 */
+#ocean-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: 
+    linear-gradient(rgba(0, 8, 20, 0.6), rgba(0, 8, 20, 0.9)),
+    url('deep-sea-city.png');
+    background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 0;
+}
+
+body.in-result #ocean-bg::after { opacity: 1; }
+body.in-result #ocean-bg::before { opacity: 0.5; }
+
+.bubble {
+  position: absolute; bottom: -50px;
+  background: var(--neon-cyan); border-radius: 50%;
+  pointer-events: none; filter: blur(2px);
+  animation: rise linear infinite; z-index: -1;
+}
+@keyframes rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
+}
+
+/* ヘッダー */
+.site-header {
+  position: fixed; top: 0; width: 100%; padding: 15px 25px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-sizing: border-box; z-index: 100;
+  border-bottom: 1px solid var(--border-cyan);
+  background: rgba(0, 15, 30, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.site-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem; letter-spacing: 0.3rem;
+  color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* パネル */
+.main-frame {
+  position: relative; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding-top: 60px; /* ヘッダー分 */
+  box-sizing: border-box;
+}
+
+.ui-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--border-cyan);
+  padding: 50px 40px 40px 40px; /* 上部パディングを強化 */
+  backdrop-filter: blur(15px);
+  position: relative;
+  max-width: 1000px; width: 85%;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.creator-tag {
+  position: absolute; right: 15px; bottom: 15px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem; color: rgba(0, 242, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--neon-cyan); }
+.c-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+.c-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+.c-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+.c-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+.cyber-btn {
+  font-family: 'Orbitron', sans-serif;
+  padding: 15px 40px; background: transparent;
+  color: var(--neon-cyan); border: 1px solid var(--neon-cyan);
+  cursor: pointer; position: relative; transition: 0.3s;
+  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+.cyber-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
+
+/* 解析結果表示 */
+#resultContainer { display: none; }
+.result-layout { 
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: start; 
+}
+
+.floating-organism {
+  width: 140%; max-width: 580px; 
+  filter: drop-shadow(0 0 25px var(--neon-cyan));
+  transform: translateX(-10%);
+}
+.anim-float { animation: float 6s ease-in-out infinite; }
+.static-33 { animation: none !important; filter: drop-shadow(0 0 40px #fff); }
+
+@keyframes float { 
+  0%, 100% { transform: translateY(0) rotate(2deg) translateX(-10%); } 
+  50% { transform: translateY(-30px) rotate(-1deg) translateX(-10%); } 
+}
+
+/* タイトルエリアの改善 */
+.result-content h2 { 
+  font-family: 'Noto Sans JP', sans-serif; font-size: 2rem;
+  margin: 10px 0 20px 0; 
+  color: #fff;
+  text-shadow: 0 0 15px var(--neon-cyan);
+  border-left: 5px solid var(--neon-cyan); padding-left: 15px;
+  line-height: 1.2;
+}
+
+.label-box {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; 
+  color: var(--neon-cyan); background: rgba(0, 242, 255, 0.15); 
+  padding: 3px 10px; display: inline-block; margin-top: 10px;
+}
+
+.data-list { list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.6; color: #d0f0ff; }
+.data-list li::before { content: "▷ "; color: var(--neon-cyan); }
+
+.message-box {
+  margin-top: 20px; padding: 20px;
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px dashed var(--border-cyan);
+  font-style: italic; font-size: 0.95rem; line-height: 1.6;
+}
+
+@media (max-width: 850px) {
+  .result-layout { grid-template-columns: 1fr; }
+  .floating-organism { width: 100%; transform: none; margin-bottom: 20px; }
+  .ui-panel { padding: 40px 20px 20px 20px; width: 92%; }
+}
+</style>
+</head>
+<body onload="createBubbles()">
+
+<div id="ocean-bg"></div>
+
+<header class="site-header">
+  <div class="site-title">OCEAN TENDENCY</div>
+  <div id="systemStatus" style="font-family:'Share Tech Mono'; color:var(--neon-cyan); font-size:0.75rem;">SYSTEM_READY</div>
+</header>
+
+<main class="main-frame">
+  <!-- 初期パネル -->
+  <div class="ui-panel" id="inputPanel">
+    <div class="corner c-tl"></div><div class="corner c-tr"></div>
+    <div class="corner c-bl"></div><div class="corner c-br"></div>
+    
+    <div style="text-align:center;">
+      <h2 style="font-family:'Orbitron'; font-weight:300; letter-spacing:0.3rem; font-size:0.85rem; margin-bottom:30px;">GENOME SCANNER V2.0</h2>
+      <input type="date" id="birthdate" style="background:rgba(0,242,255,0.1); border:1px solid var(--border-cyan); color:white; padding:15px; font-family:'Orbitron'; font-size:1.2rem; margin-bottom:40px; outline:none; width:260px;">
+      <br>
+      <button class="cyber-btn" id="resultBtn">RUN ANALYSIS</button>
+    </div>
+
+    <div class="creator-tag">created by SHIJIMI KEN</div>
+  </div>
+
+  <!-- 結果表示パネル -->
+  <div class="ui-panel" id="resultContainer">
+    <div class="corner c-tl"></div><div class="corner c-tr"></div>
+    <div class="corner c-bl"></div><div class="corner c-br"></div>
+    <div id="resultContent"></div>
+    <div style="text-align:right; margin-top:20px;">
+      <button class="cyber-btn" style="padding: 10px 25px; font-size:0.7rem;" id="backBtn">BACK TO SCANNER</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const numerologyData = {
+    "01": { title: "開拓突進型", organism: "サメ（高速突進型個体）", abilities: ["始める", "きっかけを作る", "動かし出す"], cautions: ["始めたあと任せるのが苦手", "途中の調整より次へ行きたくなる"], message: "速い流れは、迷わず前へ進む。進んだあとで、海は形を整えていく。" },
+    "02": { title: "共鳴調整型", organism: "イルカ（音波共鳴型個体）", abilities: ["感じ取る", "調整する", "仲介する"], cautions: ["相手に合わせすぎ自分を後回しに", "決断を他人に委ねがち"], message: "波が重なる場所では、静かな響きが生まれる。感じた流れは、海の一部だ。" },
+    "03": { title: "発光表現型", organism: "熱帯魚（発色通信型個体）", abilities: ["表現する", "楽しませる", "場を明るくする"], cautions: ["気分で動きやすく波が出やすい", "軽く見られることに傷つきやすい"], message: "光は、隠れようとしない。泳ぐほどに、色は広がっていく。" },
+    "04": { title: "構造安定型", organism: "カメ（耐圧構造型個体）", abilities: ["積み重ねる", "守る", "安定させる"], cautions: ["変化を避けすぎることがある", "柔軟さを失いやすい"], message: "深い場所では、速さは必要ない。重ねた時間が、海を支えている。" },
+    "05": { title: "流動探査型", organism: "タコ（形態変化型個体）", abilities: ["変わる", "抜け道を見つける", "自由に動く"], cautions: ["定着を避けすぎることがある", "飽きやすい"], message: "形は、ひとつに決まらない。流れに合わせて、海も姿を変えている。" },
+    "06": { title: "保護循環型", organism: "クジラ（低周波共鳴型個体）", abilities: ["守る", "育てる", "支える"], cautions: ["背負いすぎて疲弊しやすい", "自分の欲求を後回しにしがち"], message: "遠くまで届くものほど、静かに広がる。見えない場所でも、流れは続いている。" },
+    "07": { title: "深層観測型", organism: "深海魚（極限適応型個体）", abilities: ["探究する", "見抜く", "本質を掴む"], cautions: ["あえて難しい道を選んでしまう", "孤立しやすい"], message: "光のない場所にも、海は広がっている。静けさの中で、多くのものが見えてくる。" },
+    "08": { title: "支配構築型", organism: "シャチ（高知能制圧型個体）", abilities: ["統率する", "実行する", "形にする"], cautions: ["強さが圧になりやすい", "感情を後回しにしがち"], message: "大きな流れは、静かに動く。力は、波とともに形を変える。" },
+    "09": { title: "循環解放型", organism: "クラゲ（境界溶解型個体）", abilities: ["手放す", "癒す", "循環させる"], cautions: ["現実感を失いやすい", "流されすぎることがある"], message: "境目がほどけるとき、海は広がる。終わりのあとに、新しい流れが生まれる。" },
+    "11": { title: "直感通信型", organism: "マンタ（次元滑空型個体）", abilities: ["直感する", "伝える", "導く"], cautions: ["現実とのズレに悩みやすい", "神経が過敏になりやすい"], message: "見えない波も、確かに動いている。高く泳ぐほど、海の広さが見えてくる。" },
+    "22": { title: "世界設計型", organism: "サンゴ礁（巨大構造形成型）", abilities: ["設計する", "持続させる", "形にする"], cautions: ["責任を抱え込みすぎる", "完璧を求めすぎる"], message: "小さな積み重ねが、やがて海の形になる。時間は、静かに層を作っていく。" },
+    "33": { title: "全体統合型", organism: "深海そのもの（全生命統合フィールド）", abilities: ["包む", "統合する", "存在させる"], cautions: ["自己境界が曖昧になりやすい", "疲労に気づきにくい"], message: "名前がなくても、海は存在している。すべてを含んだまま、流れは続いていく。" }
+};
+
+function createBubbles() {
+    const bg = document.getElementById('ocean-bg');
+    for (let i = 0; i < 20; i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        const size = Math.random() * 4 + 2 + 'px';
+        b.style.width = size; b.style.height = size;
+        b.style.left = Math.random() * 100 + 'vw';
+        b.style.animationDuration = Math.random() * 8 + 4 + 's';
+        bg.appendChild(b);
+    }
+}
+
+function calcNumerology(dateStr){
+    const digits = dateStr.replace(/-/g, '').split('');
+    let sum = digits.reduce((acc, d) => acc + Number(d), 0);
+    while (sum > 9 && ![11, 22, 33].includes(sum)) {
+        sum = sum.toString().split('').reduce((acc, d) => acc + Number(d), 0);
+    }
+    return sum;
+}
+
+const resultBtn = document.getElementById('resultBtn');
+const resultContainer = document.getElementById('resultContainer');
+const inputPanel = document.getElementById('inputPanel');
+const resultContent = document.getElementById('resultContent');
+const backBtn = document.getElementById('backBtn');
+const status = document.getElementById('systemStatus');
+
+resultBtn.addEventListener('click', () => {
+  let birth = document.getElementById('birthdate').value; 
+  if(!birth){alert("入力が必要です"); return;}
+  
+  let num = calcNumerology(birth);
+  let code = (num < 10) ? ('0' + num) : num.toString();
+  let data = numerologyData[code];
+
+  document.body.classList.add('in-result');
+  status.innerText = "ANALYSIS_COMPLETE";
+
+  inputPanel.style.display = 'none';
+  resultContainer.style.display = 'block';
+  
+  const animClass = (num === 33) ? "static-33" : "anim-float";
+
+  resultContent.innerHTML = `
+    <div class="result-layout">
+      <div>
+        <img src="code${code}.png" alt="${data.organism}" class="floating-organism ${animClass}">
+      </div>
+      <div class="result-content">
+        <div class="label-box">GENETIC_ID: ${code}</div>
+        <h2>${data.title}</h2>
+        <div class="label-box">MODEL_INFO</div>
+        <p style="margin:5px 0 15px 0; color:var(--neon-cyan); font-weight:500;">${data.organism}</p>
+        <div class="label-box">CORE_ABILITIES</div>
+        <ul class="data-list">${data.abilities.map(a => `<li>${a}</li>`).join('')}</ul>
+        <div class="label-box">SYSTEM_CAUTIONS</div>
+        <ul class="data-list">${data.cautions.map(c => `<li>${c}</li>`).join('')}</ul>
+        <div class="label-box">TERMINAL_MSG</div>
+        <div class="message-box">${data.message}</div>
+      </div>
+    </div>
+  `;
+});
+
+backBtn.addEventListener('click', () => {
+  document.body.classList.remove('in-result');
+  status.innerText = "SYSTEM_READY";
+  resultContainer.style.display = 'none';
+  inputPanel.style.display = 'block';
+});
+</script>
+</body>
+</html>
