@@ -1,9 +1,23 @@
+--- START OF FILE text/html ---
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ocean Tendency | Deep Sea Numerology</title>
+
+<!-- PWA Meta Tags -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ocean Tendency">
+<meta name="theme-color" content="#000814">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@100;300;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -28,6 +42,25 @@ body, html {
 /* 通常時はスクロール禁止、結果表示時は解禁 */
 body { overflow-y: hidden; }
 body.in-result { overflow-y: auto; }
+
+/* イントロオーバーレイ */
+#intro-overlay {
+  position: fixed; inset: 0; background: var(--deep-blue);
+  z-index: 2000; display: flex; align-items: center; justify-content: center;
+  padding: 30px; transition: opacity 1s ease-in-out;
+}
+#intro-text-container {
+  max-width: 600px; width: 100%;
+  font-family: 'Share Tech Mono', 'Noto Sans JP', monospace;
+  color: var(--neon-cyan); font-size: 0.95rem; line-height: 2;
+  text-shadow: 0 0 5px var(--neon-cyan);
+}
+.typing-cursor {
+  display: inline-block; width: 10px; height: 1.2rem;
+  background: var(--neon-cyan); margin-left: 5px; vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* 背景制御 */
 #ocean-bg {
@@ -139,7 +172,7 @@ input[type="date"] {
   display: grid; 
   grid-template-columns: 1fr 1.2fr; /* 左右に分割 */
   gap: 40px; 
-  align-items: center; /* 垂直方向中央揃えに変更 */
+  align-items: start; 
 }
 
 /* 画像表示エリア */
@@ -147,12 +180,11 @@ input[type="date"] {
   position: relative;
   display: flex; justify-content: center; align-items: center;
   background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
-  min-height: 400px; /* 画像拡大に合わせて高さを調整 */
+  min-height: 300px;
 }
 
 .floating-organism {
-  width: 100%; 
-  max-width: 490px; /* 350px * 1.4 = 490px */
+  width: 100%; max-width: 350px;
   height: auto;
   filter: drop-shadow(0 0 20px var(--neon-cyan));
   z-index: 5;
@@ -195,18 +227,17 @@ input[type="date"] {
   z-index: 10; flex-direction: column; align-items: center; justify-content: center;
 }
 
-/* --- モバイル対応 --- */
+/* --- モバイル対応 (重要) --- */
 @media (max-width: 850px) {
   .result-layout { 
     grid-template-columns: 1fr; /* 縦1列にする */
-    gap: 10px; 
+    gap: 20px; 
   }
   .organism-container {
-    min-height: 280px; /* スマホでの画像エリア確保 */
-    order: -1; /* 画像を必ずテキストの上に配置 */
+    min-height: 200px; /* 画像エリアを少し低く */
   }
   .floating-organism {
-    max-width: 310px; /* 220px * 1.4 = 308px (切り上げ310px) */
+    max-width: 220px; /* スマホでは画像を小さく */
   }
   .ui-panel {
     padding: 30px 20px;
@@ -218,7 +249,12 @@ input[type="date"] {
 }
 </style>
 </head>
-<body onload="createBubbles()">
+<body onload="initSystem()">
+
+<!-- イントロオーバーレイ -->
+<div id="intro-overlay">
+  <div id="intro-text-container"><span id="typed-content"></span><span class="typing-cursor">_</span></div>
+</div>
 
 <div id="ocean-bg"></div>
 <div class="scanline"></div>
@@ -229,6 +265,7 @@ input[type="date"] {
 </header>
 
 <main class="main-frame">
+  <!-- 入力画面 -->
   <div class="ui-panel" id="inputPanel">
     <div class="corner c-tl"></div><div class="corner c-tr"></div>
     <div class="corner c-bl"></div><div class="corner c-br"></div>
@@ -243,6 +280,7 @@ input[type="date"] {
     <div class="creator-tag" style="position: absolute; right: 15px; bottom: 15px; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: rgba(0, 242, 255, 0.4);">DATA_VERSION: 2.0.4</div>
   </div>
 
+  <!-- 結果表示画面 -->
   <div class="ui-panel" id="resultContainer" style="display:none;">
     <div id="loadingOverlay">
         <div style="font-family:'Orbitron'; color:var(--neon-cyan); margin-bottom:20px; letter-spacing:5px;">ANALYZING...</div>
@@ -276,6 +314,40 @@ const numerologyData = {
     "22": { title: "世界設計型", organism: "REEF-ARCHITECT (Global-Struct)", abilities: ["大規模社会設計", "永続的システムの構築", "具現化"], cautions: ["全責任の集中負荷", "微細な不整合への過敏反応"], message: "小さな積み重ねが、やがて海の形になる。時間は、静かに層を作っていく。" },
     "33": { title: "全体統合型", organism: "THE OCEAN (Universal-Field)", abilities: ["全データの包含", "普遍的愛の供給", "存在の肯定"], cautions: ["自己個体意識の希薄化", "肉体的疲労の感知不全"], message: "名前がなくても、海は存在している。すべてを含んだまま、流れは続いていく。" }
 };
+
+const introText = `>> DEEP_SEA_SYNCHRONICITY_LEVEL: 98.4%
+>> QUANTUM_ID_SYNC_READY...
+>> 生年月日をシード値とする並行現実の同期を開始。
+>> ここで解析される「生物」は、並行世界の深海でサイボーグ化されたあなたのスペア個体である。その能力と脆弱性は、この世界のあなたの運命と完全に同期している。`;
+
+function initSystem() {
+    createBubbles();
+    runIntro();
+}
+
+async function runIntro() {
+    const target = document.getElementById('typed-content');
+    const overlay = document.getElementById('intro-overlay');
+    const lines = introText.split('\n');
+    
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        for (let char of line) {
+            target.innerHTML += char;
+            await new Promise(r => setTimeout(r, 45)); // タイピング速度
+        }
+        target.innerHTML += '<br>';
+        await new Promise(r => setTimeout(r, 400)); // 改行後のウェイト
+    }
+
+    // 完了後、少し待ってフェードアウト
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 1000);
+    }, 1500);
+}
 
 function createBubbles() {
     const bg = document.getElementById('ocean-bg');
