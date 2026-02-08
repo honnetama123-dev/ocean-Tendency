@@ -1,5 +1,3 @@
---- START OF FILE text/html ---
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -7,14 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ocean Tendency | Deep Sea Numerology</title>
 
-<!-- PWA Meta Tags -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ocean Tendency">
 <meta name="theme-color" content="#000814">
 
-<!-- Icons -->
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 
@@ -153,7 +149,8 @@ input[type="date"] {
   font-family: 'Orbitron';
   font-size: 1.2rem;
   outline: none;
-  width: 100%; max-width: 280px;
+  width: 100%; 
+  max-width: 100%; /* ここを 280px から 100% に変更 */
   box-sizing: border-box;
 }
 
@@ -251,7 +248,6 @@ input[type="date"] {
 </head>
 <body onload="initSystem()">
 
-<!-- イントロオーバーレイ -->
 <div id="intro-overlay">
   <div id="intro-text-container"><span id="typed-content"></span><span class="typing-cursor">_</span></div>
 </div>
@@ -265,7 +261,6 @@ input[type="date"] {
 </header>
 
 <main class="main-frame">
-  <!-- 入力画面 -->
   <div class="ui-panel" id="inputPanel">
     <div class="corner c-tl"></div><div class="corner c-tr"></div>
     <div class="corner c-bl"></div><div class="corner c-br"></div>
@@ -280,7 +275,6 @@ input[type="date"] {
     <div class="creator-tag" style="position: absolute; right: 15px; bottom: 15px; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: rgba(0, 242, 255, 0.4);">DATA_VERSION: 2.0.4</div>
   </div>
 
-  <!-- 結果表示画面 -->
   <div class="ui-panel" id="resultContainer" style="display:none;">
     <div id="loadingOverlay">
         <div style="font-family:'Orbitron'; color:var(--neon-cyan); margin-bottom:20px; letter-spacing:5px;">ANALYZING...</div>
