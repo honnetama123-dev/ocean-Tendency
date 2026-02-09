@@ -107,14 +107,14 @@ body.glitch { filter: hue-rotate(90deg) brightness(1.5); }
   box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
 }
 
-/* 生物画像サイズ： 1.3倍に調整 (350px -> 455px) */
+/* 生物画像サイズ設定 */
 .organism-container {
   position: relative; display: flex; justify-content: center; align-items: center;
   background: radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 75%);
   min-height: 400px;
 }
 .floating-organism {
-  width: 100%; max-width: 455px; /* 1.3x */
+  width: 100%; max-width: 455px; /* 通常1.3x */
   height: auto; filter: drop-shadow(0 0 30px var(--neon-cyan));
   z-index: 5; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -122,6 +122,20 @@ body.glitch { filter: hue-rotate(90deg) brightness(1.5); }
 @keyframes float { 
   0%, 100% { transform: translateY(0) rotate(2deg) scale(1); } 
   50% { transform: translateY(-30px) rotate(-1deg) scale(1.02); } 
+}
+
+/* 数秘33専用のスタイル */
+.is-master-33 {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 50px var(--neon-cyan)) !important;
+  animation: none !important; /* アニメーション停止 */
+}
+.master-glow {
+  background: radial-gradient(circle, rgba(0, 242, 255, 0.4) 0%, transparent 85%) !important;
+  box-shadow: inset 0 0 100px rgba(0, 242, 255, 0.2);
 }
 
 /* 結果のテキスト部分 */
@@ -149,7 +163,8 @@ body.glitch { filter: hue-rotate(90deg) brightness(1.5); }
 /* モバイル対応 */
 @media (max-width: 850px) {
   .result-layout { grid-template-columns: 1fr; gap: 20px; }
-  .floating-organism { max-width: 280px; } /* 220px -> 280px (1.3x) */
+  .floating-organism { max-width: 280px; }
+  .is-master-33 { max-width: 100% !important; }
   .organism-container { min-height: 300px; }
   .ui-panel { padding: 30px 20px; width: 95%; }
 }
@@ -217,10 +232,10 @@ const numerologyData = {
     "33": { title: "全体統合型", organism: "THE OCEAN (Universal-Field)", abilities: ["全データの包含", "普遍的愛の供給", "存在の肯定"], cautions: ["自己個体意識の希薄化", "肉体的疲労の感知不全"], message: "名前がなくても、海は存在している。すべてを含んだまま、流れは続いていく。" }
 };
 
-const introText = `>> CONNECTING_TO_ABYSSAL_SERVER... OK
->> ANALYZING_TEMPORAL_SEED... OK
->> 深海には、もうひとつの「あなた」が泳いでいる。
->> その遺伝子コードを復元し、現在の同期率を算出する。`;
+const introText = `>> DEEP_SEA_SYNCHRONICITY_LEVEL: 98.4%
+>> QUANTUM_ID_SYNC_READY...
+>> 生年月日をシード値とする並行現実の同期を開始。
+>> ここで解析される「生物」は、並行世界の深海でサイボーグ化されたあなたのスペア個体である。その能力と脆弱性は、この世界のあなたの運命と完全に同期している。`;
 
 let audioCtx;
 function playBeep(freq = 440, duration = 0.1) {
@@ -305,11 +320,9 @@ resultBtn.addEventListener('click', async () => {
     const loading = document.getElementById('loadingOverlay');
     loading.style.display = 'flex';
     
-    // 没入演出：深度更新
     const targetDepth = 4000 + Math.floor(Math.random() * 6000);
     updateDepth(targetDepth);
     
-    // プログレスバー
     const bar = document.getElementById('progressBar');
     bar.style.transition = 'none'; bar.style.left = '-100%';
     setTimeout(() => { bar.style.transition = 'left 3s ease-in-out'; bar.style.left = '0%'; }, 50);
@@ -342,33 +355,35 @@ function showResult(birth, depth) {
     let data = numerologyData[code];
     document.body.classList.add('in-result');
     
+    // 数秘33専用のクラス判定
+    const is33 = (code === '33');
+    const imgClass = is33 ? 'floating-organism is-master-33' : 'floating-organism anim-float';
+    const containerClass = is33 ? 'organism-container master-glow' : 'organism-container';
+    
     document.getElementById('resultContent').innerHTML = `
         <div class="result-layout">
-            <div class="organism-container">
-                <img src="code${code}.png" alt="${data.organism}" class="floating-organism anim-float">
+            <div class="${containerClass}">
+                <img src="code${code}.png" alt="${data.organism}" class="${imgClass}">
             </div>
             <div class="result-content">
                 <div style="font-family:'Share Tech Mono'; font-size:0.7rem; color:var(--neon-cyan); margin-bottom:10px;">>> GENOME_SEQUENCE_RECOVERED</div>
                 <h2 style="font-size:2.2rem; margin:0 0 20px 0; text-shadow:0 0 20px var(--neon-cyan); border-left:4px solid var(--neon-cyan); padding-left:15px;">${data.title}</h2>
                 
-                <div class="sensor-grid">
-                    <div class="sensor-item">TEMP: 2.4°C</div>
-                    <div class="sensor-item">PRESS: ${(depth/10).toFixed(1)}MPa</div>
-                    <div class="sensor-item">VITAL: STABLE</div>
-                    <div class="sensor-item">SYNC: 99.2%</div>
-                </div>
-
                 <p style="margin:20px 0; color:var(--neon-cyan); font-family:'Orbitron'; font-size:1rem; letter-spacing:1px;">${data.organism}</p>
                 
                 <div style="background:rgba(0,242,255,0.05); border:1px solid var(--border-cyan); padding:20px; font-size:0.9rem; line-height:1.8;">
-                    <div style="color:var(--neon-cyan); font-family:'Share Tech Mono'; font-size:0.7rem; margin-bottom:10px;">[RECORDS]</div>
+                    <div style="color:var(--neon-cyan); font-family:'Share Tech Mono'; font-size:0.7rem; margin-bottom:10px;">[ABILITIES]</div>
                     ${data.abilities.map(a => `<div style="margin-bottom:5px;">+ ${a}</div>`).join('')}
+                    
+                    <div style="color:#ff4d4d; font-family:'Share Tech Mono'; font-size:0.7rem; margin:15px 0 10px 0;">[CAUTIONS]</div>
+                    ${data.cautions.map(c => `<div style="margin-bottom:5px; color:#ffb3b3;">- ${c}</div>`).join('')}
+
                     <div style="height:1px; background:var(--border-cyan); margin:15px 0;"></div>
                     <div style="color:#b0dfff; font-style:italic;">"${data.message}"</div>
                 </div>
             </div>
         </div>`;
-    playBeep(660, 0.2);
+    playBeep(is33 ? 990 : 660, 0.3);
 }
 
 document.getElementById('backBtn').addEventListener('click', () => {
